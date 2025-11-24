@@ -5,7 +5,7 @@ on:
     branches: ["main"]
 
 jobs:
-  build:
+  build-and-push-image:
     runs-on: ubuntu-latest
 
     permissions:
@@ -30,3 +30,13 @@ jobs:
       - name: Push image
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/hello-world-nginx:latest
+
+  deploy-image-prod:
+    runs-on: arc-rs-deploily-console
+    needs: build-and-push-image
+    if: github.repository_owner == 'deploily'
+    steps:
+      - run: |
+          echo "🎉 Deploy using runner scale set runners:)"
+          kubectl -n deploily rollout restart deployment tuto-algeria-dpz
+          echo "🎉 Deployment runners finished"
